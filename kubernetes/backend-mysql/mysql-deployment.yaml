@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-mysql
+  labels:
+    app: backend-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-mysql
+  template:
+    metadata:
+      labels:
+        app: backend-mysql
+    spec:
+      containers:
+      - image: mysql:5.7.25
+        name: backend-mysql
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: backend-mysql-root-password
+                name: backend-mysql
+        ports:
+          - containerPort: 3306
+            name: backend-mysql
+        volumeMounts:
+          - name: data
+            mountPath: /var/lib/mysql
+        args:
+          - "--ignore-db-dir=lost+found"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: backend-mysql

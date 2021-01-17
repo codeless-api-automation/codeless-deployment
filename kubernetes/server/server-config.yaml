@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scdf-server
+  labels:
+    app: scdf-server
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          applicationProperties:
+            stream:
+              management:
+                metrics:
+                  export:
+                    prometheus:
+                      enabled: true
+                      rsocket:
+                        enabled: true
+                        host: prometheus-proxy
+                        port: 7001
+            task:
+              management:
+                metrics:
+                  export:
+                    prometheus:
+                      enabled: true
+                      rsocket:
+                        enabled: true
+                        host: prometheus-proxy
+                        port: 7001
+              test:
+                datasource:
+                  jdbc-url: jdbc:mysql://${BACKEND_MYSQL_SERVICE_HOST}:${BACKEND_MYSQL_SERVICE_PORT}/mysql
+                  username: root
+                  password: ${backend-mysql-root-password}
+                  driverClassName: org.mariadb.jdbc.Driver
+          metrics.dashboard:
+            url: 'https://grafana:3000'
+            type: 'GRAFANA'
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    limits:
+                      memory: 1024Mi
+                    createJob: true
+                    backoffLimit: 0
+      datasource:
+        url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/mysql
+        username: root
+        password: ${mysql-root-password}
+        driverClassName: org.mariadb.jdbc.Driver
+        testOnBorrow: true
+        validationQuery: "SELECT 1"
+
